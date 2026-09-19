@@ -29,7 +29,11 @@ function setStatus(text, isError = false) {
 
 async function api(path, options) {
   const res = await fetch(path, options);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  if (!res.ok) {
+    const err = new Error(`${res.status} ${res.statusText}`);
+    err.status = res.status;
+    throw err;
+  }
   return res.json();
 }
 
@@ -236,9 +240,13 @@ async function send(text) {
     setSuggestions(data.suggestions);
   } catch (err) {
     typing.remove();
-    addMessage("bot", "I couldn't reach the FinSight server. Make sure it is running " +
-      "(run.bat, or: uvicorn app.main:app) and try again.");
-    setStatus("Server offline", true);
+    if (err.status === 429) {
+      addMessage("bot", "You are sending messages too quickly. Please wait a moment and try again.");
+    } else {
+      addMessage("bot", "I couldn't reach the FinSight server. If you are running it locally, start it with " +
+        "run.bat (or: uvicorn app.main:app) and try again.");
+      setStatus("Server offline", true);
+    }
   } finally {
     state.busy = false;
     $("send").disabled = false;

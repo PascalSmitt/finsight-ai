@@ -6,17 +6,24 @@ import re
 import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import analytics as an
-from . import db, ingest, llm
+from . import db, ingest, limits, llm
 from .chatbot import DISCLAIMER, ChatEngine
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 engine = ChatEngine()
+limiter, budget = limits.from_env()
+
+
+def client_ip(request: Request) -> str:
+    """Real client address behind a proxy (Render sets X-Forwarded-For)."""
+    fwd = request.headers.get("x-forwarded-for", "")
+    return fwd.split(",")[0].strip() or (request.client.host if request.client else "unknown")
 
 
 @asynccontextmanager
@@ -85,10 +92,12 @@ def summary(ticker: str):
 
 
 @app.post("/api/chat")
-def chat(req: ChatRequest):
+def chat(req: ChatRequest, request: Request):
+    if not limiter.allow(client_ip(request)):
+        raise HTTPException(429, "You are sending messages too quickly. Please wait a moment and try again.")
     sid = req.session_id or uuid.uuid4().hex[:16]
     message = re.sub(r"\s+", " ", req.message).strip()
-    result = engine.reply(sid, message, an.get_frame())
+    result = engine.reply(sid, message, an.get_frame(), allow_llm=llm.available() and budget.take())
     db.log_message(sid, "user", message)
     db.log_message(sid, "bot", result["reply"], result.get("intent"))
     return {**result, "session_id": sid, "disclaimer": DISCLAIMER}

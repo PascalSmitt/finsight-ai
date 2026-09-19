@@ -8,7 +8,7 @@ Ask *"How has Tesla's net income changed?"*, *"Compare profit margins"* or *"Whi
 
 > Grew out of a BCG GenAI job-simulation (Forage): extract financials from 10-Ks, analyse them in pandas, then build a chatbot. This project turns that prototype into a complete application.
 
-<!-- Add a screenshot: docs/screenshot.png -->
+![FinSight AI dashboard and chatbot](docs/screenshot.png)
 
 ## Features
 
@@ -19,7 +19,7 @@ Ask *"How has Tesla's net income changed?"*, *"Compare profit margins"* or *"Whi
 - **Chatbot** with two modes:
   - **Rules mode (default, no API key needed):** entity extraction (company, metric, year), typo tolerance, 9 intents (value, change, trend, compare, rank, health, list, help, greeting), per-session memory ("and its cash flow?"), graceful fallbacks, and inline charts.
   - **AI mode (optional):** set `ANTHROPIC_API_KEY` and Claude answers using tool calls over the same data functions, so numbers stay grounded in the database. Any failure falls back to rules mode.
-- **41 automated tests**, GitHub Actions CI, Dockerfile.
+- **46 automated tests**, GitHub Actions CI, Dockerfile.
 
 ## Architecture
 
@@ -111,7 +111,7 @@ python -m pytest -q
 - **Grounded answers.** The chatbot never generates numbers itself. Both modes read them from the database; in AI mode the model can only obtain figures through tools.
 - **Rules first, LLM optional.** The app is fully functional, deterministic and testable without any API key; the LLM is an upgrade, not a dependency.
 - **Data hygiene.** Only 10-K full-year periods are used (quarters are excluded), the latest filing wins when a figure was restated, and net income is consolidated (`ProfitLoss`, including non-controlling interests). Missing growth for a first year stays empty instead of being filled with 0. Companies that don't tag total liabilities (e.g. Amazon) get it derived as assets minus equity.
-- **Security.** Input length and session-id validation, all user text rendered with `textContent` (no HTML injection), refresh endpoint off by default, secrets via environment variables.
+- **Security and cost control.** Per-client rate limiting (20 messages/min) and a daily cap on LLM-backed answers (`LLM_DAILY_LIMIT`, default 200) so a public deployment cannot run up an API bill; input length and session-id validation, all user text rendered with `textContent` (no HTML injection), refresh endpoint off by default, secrets via environment variables.
 
 ## Limitations
 

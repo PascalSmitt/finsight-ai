@@ -1,7 +1,7 @@
 # Render Blueprint: one-click deploy from the GitHub repo (New > Blueprint)
 services:
   - type: web
-    name: finsight-ai
+    name: finsight-ai-kelechi
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
@@ -10,4 +10,12 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.7
-      # Optional: add ANTHROPIC_API_KEY in the Render dashboard to enable AI mode (never commit it)
+      # AI mode: paste your key in the Render dashboard (sync: false keeps it out of the repo).
+      # Leave it empty to run in rules mode.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Abuse protection for a public site (protects the API bill)
+      - key: CHAT_RATE_PER_MIN
+        value: "20"
+      - key: LLM_DAILY_LIMIT
+        value: "200"

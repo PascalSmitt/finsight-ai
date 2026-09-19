@@ -121,14 +121,14 @@ class ChatEngine:
         self.max_sessions = max_sessions
 
     # ---------------------------------------------------------------- public
-    def reply(self, session_id: str, message: str, df: pd.DataFrame) -> dict:
+    def reply(self, session_id: str, message: str, df: pd.DataFrame, allow_llm: bool = True) -> dict:
         state = self.sessions.setdefault(session_id, {"ticker": None, "history": []})
         if len(self.sessions) > self.max_sessions:
             self.sessions.pop(next(iter(self.sessions)))
         u = Understanding(message, df)
         mode = "rules"
         result = None
-        if llm.available():
+        if allow_llm and llm.available():
             result = llm.answer(message, state["history"], _Tools(df, state))
             mode = "llm" if result else "rules"
         if result is None:
