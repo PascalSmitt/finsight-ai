@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinSight AI</title>
+  <meta name="description" content="Financial analytics dashboard and chatbot built on SEC 10-K filings.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232563eb'/%3E%3Cpath d='M7 22l6-7 4 4 8-10' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="28" height="28"><rect width="32" height="32" rx="7" fill="currentColor"/><path d="M7 22l6-7 4 4 8-10" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <div>
+        <h1>FinSight AI</h1>
+        <p>Company financials from SEC 10-K filings</p>
+      </div>
+    </div>
+    <span id="status" class="status" role="status">Loading…</span>
+  </header>
+
+  <div class="layout">
+    <main id="dashboard" aria-label="Financial dashboard">
+      <section class="panel">
+        <h2>Companies</h2>
+        <div id="chips" class="chips" role="group" aria-label="Select companies"></div>
+      </section>
+
+      <section id="kpis" class="kpis" aria-label="Latest snapshot"></section>
+
+      <section class="charts" aria-label="Charts">
+        <article class="panel"><h2>Total revenue</h2><div class="chart-box"><canvas id="c-revenue"></canvas></div></article>
+        <article class="panel"><h2>Net income</h2><div class="chart-box"><canvas id="c-net_income"></canvas></div></article>
+        <article class="panel"><h2>Net margin</h2><div class="chart-box"><canvas id="c-net_margin"></canvas></div></article>
+        <article class="panel"><h2>Liabilities as % of assets</h2><div class="chart-box"><canvas id="c-liabilities_to_assets"></canvas></div></article>
+      </section>
+
+      <section class="panel">
+        <h2>Data <small>USD, fiscal years; growth vs prior year</small></h2>
+        <div class="table-wrap">
+          <table id="table">
+            <thead><tr>
+              <th>Company</th><th>FY</th><th class="num">Revenue</th><th class="num">Rev. growth</th>
+              <th class="num">Net income</th><th class="num">Net margin</th><th class="num">Assets</th>
+              <th class="num">Liabilities</th><th class="num">Op. cash flow</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="note">Source: SEC EDGAR XBRL API. Not investment advice.</p>
+      </section>
+    </main>
+
+    <aside class="chat" aria-label="Chatbot">
+      <div class="chat-head">
+        <h2>Ask FinSight</h2>
+        <button id="reset" class="link" type="button">New chat</button>
+      </div>
+      <div id="log" class="log" role="log" aria-live="polite"></div>
+      <div id="suggestions" class="suggestions"></div>
+      <form id="form" class="composer" autocomplete="off">
+        <label for="input" class="sr">Your question</label>
+        <input id="input" type="text" maxlength="500" placeholder="e.g. How has Tesla's net income changed?" required>
+        <button type="submit" id="send">Send</button>
+      </form>
+    </aside>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
