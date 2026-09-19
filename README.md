@@ -1,5 +1,7 @@
 # FinSight AI
 
+**Live demo: https://finsight-ai-zq4p.onrender.com** (free tier: the first load after idle can take up to a minute)
+
 A full-stack financial analytics dashboard with a conversational chatbot, built on real SEC 10-K data.
 
 Ask *"How has Tesla's net income changed?"*, *"Compare profit margins"* or *"Which company has the highest revenue growth?"* and get a plain-English answer with a chart, backed by figures pulled directly from SEC EDGAR.
@@ -76,6 +78,14 @@ uvicorn app.main:app
 ```bash
 docker build -t finsight-ai . && docker run -p 8000:8000 finsight-ai
 ```
+
+### Deploy (Render, free tier)
+
+1. Push this repo to GitHub.
+2. On render.com choose **New > Blueprint**, connect the repo; `render.yaml` configures everything.
+3. Wait for the build; your app is live at `https://finsight-ai.onrender.com` (name may vary).
+
+The free tier sleeps after inactivity (first request takes ~30-60 s) and its disk is ephemeral: the database is rebuilt from `data/seed_financials.csv` on each start, so chat history is not kept across restarts.
 
 ### Tests
 
